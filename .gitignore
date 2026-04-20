@@ -15,4 +15,3 @@ dist/reveal.es5.js
 react/dist
 react/demo/dist
 dev.html
-package-lock.json
