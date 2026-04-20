@@ -15,6 +15,7 @@ export const appendExtension = (format: ModuleFormat, name: String): string => {
 export default defineConfig({
 	server: {
 		port: Number(process.env.npm_config_port || 8000),
+		allowedHosts: ['localhost', 'pres.quazyr.xyz'],
 	},
 	build: {
 		target: ['es2015'],
