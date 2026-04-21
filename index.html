@@ -1,43 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-		/>
 
-		<title>reveal.js</title>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-		<link rel="stylesheet" href="dist/reset.css" />
-		<link rel="stylesheet" href="dist/reveal.css" />
-		<link rel="stylesheet" href="dist/theme/black.css" />
+    <title>OopMineGame</title>
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="dist/plugin/highlight/monokai.css" />
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/black.css" />
 
-		<script src="dist/reveal.js"></script>
-		<script src="dist/plugin/notes.js"></script>
-		<script src="dist/plugin/markdown.js"></script>
-		<script src="dist/plugin/highlight.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				hash: true,
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="dist/plugin/highlight/monokai.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --r-code-font: 'Cascadia Code', monospace;
+        }
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
-			});
-		</script>
-	</body>
+        .grass-text {
+            background: linear-gradient(to bottom,
+                    #5aa32a 0%,
+                    #79c043 25%,
+                    #674d3c 75%,
+                    #4e342e 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: bold;
+            font-family: 'Press Start 2P';
+            font-size: 0.7em;
+        }
+
+        #dropping-target .dropping-char-full {
+            display: inline-block;
+            transition: transform 0.8s ease-in, opacity 0.8s ease-in;
+        }
+
+        #dropping-target .dropping-char-half {
+            display: inline-block;
+            transition: transform 0.4s ease-in;
+        }
+
+        #dropping-target .fallen-full {
+            transform: translateY(180px) rotate(20deg);
+            opacity: 0;
+        }
+
+        #dropping-target .fallen-half {
+            transform: translateY(10px) rotate(20deg);
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate(2px, 2px);
+            }
+
+            50% {
+                transform: translate(-2px, -4px);
+            }
+
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+
+        .not-ai-logo {
+            position: fixed;
+            bottom: 6px;
+            left: 2px;
+            user-select: none;
+            -webkit-user-drag: none;
+	        -moz-user-select: none;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- <section data-markdown="oop.md" data-separator="^\n\n\n" data-separator-vertical="^\n\n" -->
+            <!-- data-separator-notes="^Note:" data-charset="utf-8"> -->
+            <!--
+                    Note that Windows uses `\r\n` instead of `\n` as its linefeed character.
+                    For a regex that supports all operating systems, use `\r?\n` instead of `\n`.
+                -->
+            <!-- </section> -->
+            <section>
+                <h3>OopMineGame<br>
+                    挖礦遊戲</h3>
+                <br>
+                <p>
+                    <span class="fragment">報告人：高憲成</span>
+                    <span class="fragment">、張育溥</span>
+                    <span class="fragment">、程昱銘</span>
+                </p>
+                <p>課程：物件導向程式設計</p>
+            </section>
+            <section id="jobs-slide">
+                <h3>分工明細</h3>
+                <ul>
+                    <li>高憲成：程式設計、GUI 開發、邏輯整合</li>
+                    <li>張育溥：文件、報告撰寫、核心架構構建</li>
+                    <li id="dropping-target">程昱銘<span data-type="half">：</span><span data-type="full">吃、睡、吃睡</span><span
+                            class="fragment" id="drop-it"></span>
+                    </li>
+                </ul>
+            </section>
+            <section>
+                <ul>
+                    <li><b>核心願景：</b>打造一個類似 <span class="grass-text">Minecraft</span> 的 2D 沙盒遊戲</li>
+                    <li><b>技術目標：</b>
+                        <ul>
+                            <li>學習 <b>C++23</b> 現代語法</li>
+                            <li>設計樹狀、<b>模組化</b>的 GUI 排版系統</li>
+                            <li>使用 <b>OOP 三大特性</b> 解決資源管理難題</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+            <section data-auto-animate>
+                <h3>系統架構</h3>
+                <p>由最基礎的 world 儲存<b>多形</b> entity 和 block </p>
+                <p>entity, block <b>封裝</b>基礎資料</p>
+                <p>再向外<b>繼承</b>、擴展</p>
+                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                    class World;                         // 儲存方塊、實體等核心資料
+                        class Entity;                    // 基礎實體，能動的個體，處理位置、重力
+                        class Block;                     // 基礎方塊
+                </code></pre>
+            </section>
+            <section data-auto-animate>
+                <h3>系統架構</h3>
+                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                    class World;                         // 儲存方塊、實體等核心資料
+                        class Entity;                    // 基礎實體，能動的個體，處理位置、重力
+                            class Player : Entity;       // 玩家，負責物理頭髮渲染
+                            class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
+                        class Block;                     // 基礎方塊
+                </code></pre>
+            </section>
+            <section data-auto-animate>
+                <h3>系統架構</h3>
+                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                    class World;                         // 儲存方塊、實體等核心資料
+                        class Entity;                    // 基礎實體，能動的個體，處理位置、重力
+                            class Player : Entity;       // 玩家，負責物理頭髮渲染
+                            class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
+                                class Sheep : Mob;       // 羊，供給目標給 Mob 做移動
+                        class Block;                     // 基礎方塊
+                </code></pre>
+            </section>
+            <section data-auto-animate>
+                <h3>系統架構</h3>
+                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                    class World;                         // 儲存方塊、實體等核心資料
+                        class Entity;                    // 基礎實體，能動的個體，處理位置、重力
+                            class Player : Entity;       // 玩家，負責物理頭髮渲染
+                            class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
+                                class Sheep : Mob;       // 羊，供給目標給 Mob 做移動
+                        class Block;                     // 基礎方塊
+                            class Leaves : Block;        // 樹葉，隨機生成粒子效果
+                            class CraftingTable : Block; // 工作台，開啟 GUI 介面給玩家製作物品
+                </code></pre>
+            </section>
+            <section data-auto-animate>
+                <h3>系統架構</h3>
+                <p>gui 同上，container <b>封裝</b>基礎資料</p>
+                <p><b>多形</b>儲存子元件</p>
+                <p>再向外<b>繼承</b>、擴展</p>
+                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                    class World;                         // 儲存方塊、實體等核心資料
+                        class Entity;                    // 基礎實體，能動的個體，處理位置、重力
+                            class Player : Entity;       // 玩家，負責物理頭髮渲染
+                            class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
+                                class Sheep : Mob;       // 羊，供給目標給 Mob 做移動
+                        class Block;                     // 基礎方塊
+                            class Leaves : Block;        // 樹葉，隨機生成粒子效果
+                            class CraftingTable : Block; // 工作台，開啟 GUI 介面給玩家製作物品
+                    namespace gui {                          
+                        class Container;                     // 基礎 GUI 元件，相對位置、儲存子元件
+                    }
+                </code></pre>
+            </section>
+            <section data-auto-animate>
+                <h3>系統架構</h3>
+                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                    class World;                         // 儲存方塊、實體等核心資料
+                        class Entity;                    // 基礎實體，能動的個體，處理位置、重力
+                            class Player : Entity;       // 玩家，負責物理頭髮渲染
+                            class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
+                                class Sheep : Mob;       // 羊，供給目標給 Mob 做移動
+                        class Block;                     // 基礎方塊
+                            class Leaves : Block;        // 樹葉，隨機生成粒子效果
+                            class CraftingTable : Block; // 工作台，開啟 GUI 介面給玩家製作物品
+                    namespace gui {                          
+                        class Container;                     // 基礎 GUI 元件，相對位置、儲存子元件
+                            class FlowContainer : Container; // 自動排序子元件
+                            class Button : Container;        // 按鈕，供給點擊邏輯
+                            class Slider : Container;        // 滑桿，供給拖曳邏輯
+                            class TextContainer : Container; // 文字，供給文字渲染
+                            class CraftingTable : Container; // 工作台，合成介面
+                    }
+                </code></pre>
+            </section>
+            <section>
+                <h3>設計模式運用</h3>
+                <ul>
+                    <li>觀察者模式 (Observer)
+                        <p>可綁定屬性於物件屬性改變時自動同步其他綁定的物件</p>
+                    </li>
+                    <li>建造者模式 (Builder)
+                        <p>優化方塊定義流程，只留必要參數，美化程式</p>
+                    </li>
+                    <li>組合模式 (Composite)
+                        <p>使用樹狀結構構建模組化 GUI</p>
+                    </li>
+                </ul>
+            </section>
+            <section>
+                <h3>觀察者模式 (Observer)</h3>
+                <p><code>Bindable&lt;T></code> 於物件屬性改變時自動同步其他綁定的物件</p>
+                <!-- <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+                    template &lt;typename T>
+                    class Bindable {
+                        // Gets the value
+                        const T& get() const;
+                        // Sets the value
+                        const T& set(T v);
+                        
+                        // Binds/copies target value to this
+                        void bindTo(Bindable&lt;T>& target);
+                        // Unbinds all and then binds to target
+                        void rebind(Bindable&lt;T>& target);
+                        void unbindFrom(Bindable&lt;T>& target);
+                        void unbindAll();
+                        
+                        // Registers a handler to be called when the value changes
+                        void onValueChanged(std::function&lt;void(const T&, const T&)> handler);
+                    }
+                </code></pre> -->
+                <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+Bindable&lt;int> p1;
+Bindable&lt;int> p2;
+p1.onValueChanged([](const auto& from, const auto& to) {
+    std::println("p1 {} -> {}", from, to); });
+p2.onValueChanged([](const auto& from, const auto& to) {
+    std::println("p2 {} -> {}", from, to); });
+p2.bindTo(p1);
+p1.set(1);
+// p1 0 -> 1
+// p2 0 -> 1
+p2.set(2);
+// p2 1 -> 2
+// p1 1 -> 2
+std::println("p1 is {}", p1.get()); // p1 is 2
+std::println("p2 is {}", p2.get()); // p2 is 2
+                </code></pre>
+            </section>
+            <section>
+                <h3>建造者模式 (Builder)</h3>
+                <p><code>BlockBuilder</code> 整合流式接口 (Fluent interface) 優化方塊定義流程，只留必要參數，美化程式</p>
+                <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+                const Block Blocks::copperOre = builder()
+                    .name("Copper Ore")
+                    .item(Items::copperOre)
+                    .loot().min(0).item(Items::cobblestone) // Default of max is 1
+                    .loot().max(3).item(Items::copperIngot) // Default of min is 1
+                    .build();
+                const Block Blocks::cherryLog = builder()
+                    .name("Cherry Log")
+                    .item(Items::cherryLog)
+                    .build();
+                const Leaves Blocks::cherryLeaves = builder()
+                    .name("Cherry Leaves")
+                    .item(Items::cherryLeaves)
+                    .transparent(true)
+                    .build&lt;Leaves>();
+                const CraftingTable Blocks::craftingTable = builder()
+                    .name("Crafting Table")
+                    .item(Items::craftingTable)
+                    .build&lt;CraftingTable>();
+                </code></pre>
+            </section>
+            <section>
+                <h3>組合模式 (Composite)</h3>
+                <p>使用樹狀結構構建模組化 GUI<br><code>gui::Container</code> 根節點包含子節點<span style="font-size: 0.7em;">包含其他子節點<span
+                            style="font-size: 0.7em;">包含更多子節點<span
+                                style="font-size: 0.7em;">包含更多子節點</span></span></span></p>
+                <p>a.k.a. C++ 版 HTML</p>
+                <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+Hotbar::Hotbar(Props props) :
+    FlowContainer(props)
+{
+    for (int i = 0; i < slots.size(); i++) {
+        Container* cont = this->addChild&lt;Container>({.size = {{20, 20}}});
+        selectors[i] = cont->addChild&lt;Container>({
+            .size = {{24, 24}},          // 大小
+            .anchor = Anchor::midMiddle, // 置中
+            .origin = Anchor::midMiddle,
+            .visible = false,            // 隱藏
+        });
+        slots[i] = cont->addChild&lt;Slot>();
+    }
+    selectors[0]->setVisible(true);
+}
+                </code></pre>
+            </section>
+            <section>
+                <h3>GitHub</h3>
+                <p><a href="https://github.com/StarryQuasi/oop-mine-game" target="_blank">StarryQuasi/oop-mine-game</a></p>
+                <!-- <br> -->
+                <img src="/written-by-a-human.png" style="margin: 5px 0;">
+                <br>
+                <img data-src="/github.png" style="height: 640px; margin: 5px 0;">
+            </section>
+            <section>
+                <h3>Q&A 時間</h3>
+                <br>
+                <p>感謝觀看，歡迎交流</p>
+                <br>
+                <br>
+                <div class="center"><small>Slides powered by</small><img src="https://revealjs.com/images/logo/reveal-white-text.svg" style="margin: 0;"></div>
+            </section>
+        </div>
+    </div>
+    <img src="/designed-by-a-human.png" class="not-ai-logo">
+
+    <script src="dist/reveal.js"></script>
+    <script src="dist/plugin/notes.js"></script>
+    <script src="dist/plugin/markdown.js"></script>
+    <script src="dist/plugin/highlight.js"></script>
+    <script>
+        // More info about initialization & config:
+        // - https://revealjs.com/initialization/
+        // - https://revealjs.com/config/
+        Reveal.initialize({
+            hash: true,
+            width: 960 * 1.3,
+            height: 700 * 1.3,
+            // Learn about plugins: https://revealjs.com/plugins/
+            plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+        });
+
+        function prepareDroppingText() {
+            for (const target of document.querySelectorAll('#dropping-target span[data-type="full"], #dropping-target span[data-type="half"]')) {
+                if (target.getAttribute('data-prepared')) return;
+
+                const text = target.innerText;
+                target.innerHTML = '';
+                target.setAttribute('data-prepared', 'true');
+
+                const className = 'dropping-char-' + target.getAttribute('data-type');
+
+                text.split('').map(char => {
+                    const span = document.createElement('span');
+                    span.innerText = char === ' ' ? '\u00A0' : char; // Handle spaces
+                    span.className = className;
+                    target.appendChild(span);
+                });
+            }
+        }
+        document.addEventListener('DOMContentLoaded', prepareDroppingText);
+
+        Reveal.on('fragmentshown', event => {
+            if (event.fragment.id === 'drop-it') {
+                const chars = document.querySelectorAll('.dropping-char-full, .dropping-char-half');
+                document.body.style.animation = 'shake 0.25s';
+                chars.forEach((span, index) => {
+                    setTimeout(() => {
+                        span.classList.add('fallen-' + span.parentElement.getAttribute('data-type'));
+                    }, index * 100);
+                });
+            }
+        });
+        Reveal.on('fragmenthidden', event => {
+            if (event.fragment.id === 'drop-it') {
+                const chars = document.querySelectorAll('.dropping-char-full, .dropping-char-half');
+                chars.forEach(span => {
+                    span.classList.remove('fallen-full', 'fallen-half');
+                });
+                document.body.style.animation = '';
+            }
+        });
+        // Reveal.on('slidetransitionend', event => {
+        //     if (event.currentSlide.id === 'jobs-slide') {
+        //         const chars = event.currentSlide.querySelectorAll('.dropping-char-full, .dropping-char-half');
+        //         setTimeout(() => {
+        //             chars.forEach((span, index) => {
+        //                 setTimeout(() => {
+        //                     span.classList.add('fallen-' + span.parentElement.getAttribute('data-type'));
+        //                 }, index * 100);
+        //             });
+        //         }, 3000);
+        //     }
+        // });
+        // Reveal.on('slidechanged', event => {
+        //     const chars = document.querySelectorAll('.dropping-char-full, .dropping-char-half');
+        //     chars.forEach(span => {
+        //         span.classList.remove('fallen-full', 'fallen-half');
+        //     });
+        // });
+    </script>
+</body>
+
 </html>
