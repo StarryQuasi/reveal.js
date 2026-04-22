@@ -133,10 +133,10 @@
             </section>
             <section data-auto-animate>
                 <h3>系統架構</h3>
-                <p>由最基礎的 world 儲存<b>多形</b> entity 和 block </p>
-                <p>entity, block <b>封裝</b>基礎資料</p>
-                <p>再向外<b>繼承</b>、擴展</p>
-                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                <p>由最基礎的世界儲存<b>多形</b>實體和方塊</p>
+                <p>實體和方塊<b>封裝</b>基礎資料</p>
+                <p>由實體向外<b>繼承</b>、擴展出</p>
+                <pre data-id="code-animation"><code data-trim data-line-numbers="2-3" style="max-height: unset;">
                     class World;                         // 儲存方塊、實體等核心資料
                         class Entity;                    // 基礎實體，能動的個體，處理位置、重力
                         class Block;                     // 基礎方塊
@@ -144,7 +144,8 @@
             </section>
             <section data-auto-animate>
                 <h3>系統架構</h3>
-                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                <p>玩家、生物，處理頭髮渲染跟路徑搜尋</p>
+                <pre data-id="code-animation"><code data-trim data-line-numbers="3-4" style="max-height: unset;">
                     class World;                         // 儲存方塊、實體等核心資料
                         class Entity;                    // 基礎實體，能動的個體，處理位置、重力
                             class Player : Entity;       // 玩家，負責物理頭髮渲染
@@ -154,23 +155,25 @@
             </section>
             <section data-auto-animate>
                 <h3>系統架構</h3>
-                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                <p>生物繼承出羊，提供目標給生物做移動</p>
+                <pre data-id="code-animation"><code data-trim data-line-numbers="5" style="max-height: unset;">
                     class World;                         // 儲存方塊、實體等核心資料
                         class Entity;                    // 基礎實體，能動的個體，處理位置、重力
                             class Player : Entity;       // 玩家，負責物理頭髮渲染
                             class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
-                                class Sheep : Mob;       // 羊，供給目標給 Mob 做移動
+                                class Sheep : Mob;       // 羊，提供目標給生物做移動
                         class Block;                     // 基礎方塊
                 </code></pre>
             </section>
             <section data-auto-animate>
                 <h3>系統架構</h3>
-                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                <p>方塊繼承出樹葉、工作台，負責粒子效果與介面開啟</p>
+                <pre data-id="code-animation"><code data-trim data-line-numbers="7-8" style="max-height: unset;">
                     class World;                         // 儲存方塊、實體等核心資料
                         class Entity;                    // 基礎實體，能動的個體，處理位置、重力
                             class Player : Entity;       // 玩家，負責物理頭髮渲染
                             class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
-                                class Sheep : Mob;       // 羊，供給目標給 Mob 做移動
+                                class Sheep : Mob;       // 羊，提供目標給生物做移動
                         class Block;                     // 基礎方塊
                             class Leaves : Block;        // 樹葉，隨機生成粒子效果
                             class CraftingTable : Block; // 工作台，開啟 GUI 介面給玩家製作物品
@@ -180,13 +183,13 @@
                 <h3>系統架構</h3>
                 <p>gui 同上，container <b>封裝</b>基礎資料</p>
                 <p><b>多形</b>儲存子元件</p>
-                <p>再向外<b>繼承</b>、擴展</p>
-                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                <p>再向外<b>繼承</b>、擴展出</p>
+                <pre data-id="code-animation"><code data-trim data-line-numbers="10" style="max-height: unset;">
                     class World;                         // 儲存方塊、實體等核心資料
                         class Entity;                    // 基礎實體，能動的個體，處理位置、重力
                             class Player : Entity;       // 玩家，負責物理頭髮渲染
                             class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
-                                class Sheep : Mob;       // 羊，供給目標給 Mob 做移動
+                                class Sheep : Mob;       // 羊，提供目標給生物做移動
                         class Block;                     // 基礎方塊
                             class Leaves : Block;        // 樹葉，隨機生成粒子效果
                             class CraftingTable : Block; // 工作台，開啟 GUI 介面給玩家製作物品
@@ -197,21 +200,22 @@
             </section>
             <section data-auto-animate>
                 <h3>系統架構</h3>
-                <pre data-id="code-animation"><code data-trim style="max-height: unset;">
+                <p>自動排序、按鈕、滑桿、文字、工作台等元件</p>
+                <pre data-id="code-animation"><code data-trim data-line-numbers="11-15" style="max-height: unset;">
                     class World;                         // 儲存方塊、實體等核心資料
                         class Entity;                    // 基礎實體，能動的個體，處理位置、重力
                             class Player : Entity;       // 玩家，負責物理頭髮渲染
                             class Mob : Entity;          // 生物，接收目標位置，處理 AI 路徑搜尋
-                                class Sheep : Mob;       // 羊，供給目標給 Mob 做移動
+                                class Sheep : Mob;       // 羊，提供目標給生物做移動
                         class Block;                     // 基礎方塊
                             class Leaves : Block;        // 樹葉，隨機生成粒子效果
                             class CraftingTable : Block; // 工作台，開啟 GUI 介面給玩家製作物品
                     namespace gui {                          
                         class Container;                     // 基礎 GUI 元件，相對位置、儲存子元件
                             class FlowContainer : Container; // 自動排序子元件
-                            class Button : Container;        // 按鈕，供給點擊邏輯
-                            class Slider : Container;        // 滑桿，供給拖曳邏輯
-                            class TextContainer : Container; // 文字，供給文字渲染
+                            class Button : Container;        // 按鈕，提供點擊邏輯
+                            class Slider : Container;        // 滑桿，提供拖曳邏輯
+                            class TextContainer : Container; // 文字，提供文字渲染
                             class CraftingTable : Container; // 工作台，合成介面
                     }
                 </code></pre>
