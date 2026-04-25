@@ -21,6 +21,17 @@
     <style>
         :root {
             --r-code-font: 'Cascadia Code', monospace;
+            --r-background-color: #3d1c28;
+            --r-link-color: #ffc0cb;
+            --r-link-color-hover: #ffd0db;
+        }
+
+        .reveal .hljs {
+            background-color: #3d1f24;
+            border: 2px solid #ffc0cb;
+            border-radius: 5px;
+            /* the bottom border gets cut off when animated without this */
+            box-sizing: border-box;
         }
 
         .grass-text {
@@ -76,7 +87,7 @@
             left: 2px;
             user-select: none;
             -webkit-user-drag: none;
-	        -moz-user-select: none;
+            -moz-user-select: none;
         }
 
         .center {
@@ -220,11 +231,61 @@
                     }
                 </code></pre>
             </section>
+            <section data-auto-animate data-auto-animate-restart>
+                <h3><span style="font-weight: normal;">封裝、繼承、</span>多型</h3>
+                <p>範例 OOP 運用</p>
+                <pre data-id="code-animation"><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+class World {
+private:
+    std::vector&lt;std::unique_ptr&lt;Entity>> entities{};
+
+    template &lt;typename T, typename... Args>
+        requires std::derived_from&lt;T, Entity> // C++20 constraints and concepts
+    void addEntity(Args&&... args) {
+        entities.push_back(std::make_unique&lt;T>(std::forward<Args>(args)...));
+    }
+
+    World() {
+        using namespace std::string_literals;
+        addEntity&lt;Player>(olc::vf2d{0, 0}, "meow"s); // 多型
+        addEntity&lt;Mob>(); // 多型
+        addEntity&lt;Sheep>(Sheep::Color::pink); // 多型
+    }
+}</code></pre>
+            </section>
+            <section data-auto-animate>
+                <h3>封裝、繼承、<span style="font-weight: normal;">多型</span></h3>
+                <pre data-id="code-animation"><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+class Entity {
+public:
+    olc::vf2d getPos() const; // 封裝
+    virtual void update();
+private:
+    olc::vf2d pos{};
+}
+
+class Mob : public Entity { // 繼承
+public:
+    void update() override { walkToTarget(); } // 繼承
+protected:
+    void setTarget(olc::vf2d) const; // 封裝
+private:
+    olc::vf2d target{};
+}
+
+class Sheep : public Mob { // 繼承
+public:
+    void update() override { // 繼承
+        setTarget(getPos() + olc::vi2d{10, 0});
+        Mob::update(); // 繼承
+    }
+}</code></pre>
+            </section>
             <section>
-                <h3>設計模式運用</h3>
+                <h3>OOP 設計模式運用</h3>
                 <ul>
                     <li>觀察者模式 (Observer)
-                        <p>可綁定屬性於物件屬性改變時自動同步其他綁定的物件</p>
+                        <p>可綁定屬性於物件改變時自動同步其他綁定的物件</p>
                     </li>
                     <li>建造者模式 (Builder)
                         <p>優化方塊定義流程，只留必要參數，美化程式</p>
@@ -236,29 +297,10 @@
             </section>
             <section>
                 <h3>觀察者模式 (Observer)</h3>
-                <p><code>Bindable&lt;T></code> 於物件屬性改變時自動同步其他綁定的物件</p>
-                <!-- <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
-                    template &lt;typename T>
-                    class Bindable {
-                        // Gets the value
-                        const T& get() const;
-                        // Sets the value
-                        const T& set(T v);
-                        
-                        // Binds/copies target value to this
-                        void bindTo(Bindable&lt;T>& target);
-                        // Unbinds all and then binds to target
-                        void rebind(Bindable&lt;T>& target);
-                        void unbindFrom(Bindable&lt;T>& target);
-                        void unbindAll();
-                        
-                        // Registers a handler to be called when the value changes
-                        void onValueChanged(std::function&lt;void(const T&, const T&)> handler);
-                    }
-                </code></pre> -->
+                <p><code>Bindable&lt;T></code> 於物件改變時自動同步其他綁定的物件</p>
                 <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
-Bindable&lt;int> p1;
-Bindable&lt;int> p2;
+Bindable&lt;int> p1{};
+Bindable&lt;int> p2{};
 p1.onValueChanged([](const auto& from, const auto& to) {
     std::println("p1 {} -> {}", from, to); });
 p2.onValueChanged([](const auto& from, const auto& to) {
@@ -278,25 +320,25 @@ std::println("p2 is {}", p2.get()); // p2 is 2
                 <h3>建造者模式 (Builder)</h3>
                 <p><code>BlockBuilder</code> 整合流式接口 (Fluent interface) 優化方塊定義流程，只留必要參數，美化程式</p>
                 <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
-                const Block Blocks::copperOre = builder()
-                    .name("Copper Ore")
-                    .item(Items::copperOre)
-                    .loot().min(0).item(Items::cobblestone) // Default of max is 1
-                    .loot().max(3).item(Items::copperIngot) // Default of min is 1
-                    .build();
-                const Block Blocks::cherryLog = builder()
-                    .name("Cherry Log")
-                    .item(Items::cherryLog)
-                    .build();
-                const Leaves Blocks::cherryLeaves = builder()
-                    .name("Cherry Leaves")
-                    .item(Items::cherryLeaves)
-                    .transparent(true)
-                    .build&lt;Leaves>();
-                const CraftingTable Blocks::craftingTable = builder()
-                    .name("Crafting Table")
-                    .item(Items::craftingTable)
-                    .build&lt;CraftingTable>();
+const Block Blocks::copperOre = builder()
+    .name("Copper Ore")
+    .item(Items::copperOre)
+    .loot().min(0).item(Items::cobblestone) // Default of max is 1
+    .loot().max(3).item(Items::copperIngot) // Default of min is 1
+    .build();
+const Block Blocks::cherryLog = builder()
+    .name("Cherry Log")
+    .item(Items::cherryLog)
+    .build();
+const Leaves Blocks::cherryLeaves = builder()
+    .name("Cherry Leaves")
+    .item(Items::cherryLeaves)
+    .transparent(true)
+    .build&lt;Leaves>();
+const CraftingTable Blocks::craftingTable = builder()
+    .name("Crafting Table")
+    .item(Items::craftingTable)
+    .build&lt;CraftingTable>();
                 </code></pre>
             </section>
             <section>
@@ -312,6 +354,7 @@ Hotbar::Hotbar(Props props) :
     for (int i = 0; i &lt; slots.size(); i++) {
         Container* cont = this->addChild&lt;Container>({.size = {{20, 20}}});
         selectors[i] = cont->addChild&lt;Container>({
+            // C++20 designated initializers
             .size = {{24, 24}},          // 大小
             .anchor = Anchor::midMiddle, // 置中
             .origin = Anchor::midMiddle,
@@ -325,23 +368,24 @@ Hotbar::Hotbar(Props props) :
             </section>
             <section>
                 <h3>GitHub</h3>
-                <p><a href="https://github.com/StarryQuasi/oop-mine-game" target="_blank">StarryQuasi/oop-mine-game</a></p>
-                <!-- <br> -->
-                <img src="/written-by-a-human.png" style="margin: 5px 0;">
+                <p><a href="https://github.com/StarryQuasi/oop-mine-game" target="_blank">StarryQuasi/oop-mine-game</a>
+                </p>
+                <img src="/written-by-a-human.svg" style="margin: 5px 0; height: 60px;">
                 <br>
                 <img data-src="/github.png" style="height: 640px; margin: 5px 0;">
             </section>
             <section>
                 <h3>Q&A 時間</h3>
                 <br>
-                <p>感謝觀看，歡迎交流</p>
+                <p>感謝觀看，歡迎交流與學習</p>
                 <br>
                 <br>
-                <div class="center"><small>Slides powered by</small><img src="https://revealjs.com/images/logo/reveal-white-text.svg" style="margin: 0;"></div>
+                <div class="center"><small>Slides powered by</small><img
+                        src="https://revealjs.com/images/logo/reveal-white-text.svg" style="margin: 0;"></div>
             </section>
         </div>
     </div>
-    <img src="/designed-by-a-human.png" class="not-ai-logo">
+    <img src="/written-by-a-human.svg" class="not-ai-logo">
 
     <script src="dist/reveal.js"></script>
     <script src="dist/plugin/notes.js"></script>
