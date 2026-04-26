@@ -115,7 +115,7 @@
                 <br>
                 <p>
                     <span class="fragment">報告人：高憲成</span>
-                    <span class="fragment">、張育溥</span>
+                    <span class="fragment">、張育<ruby>溥<rt>ㄆㄨˇ</rt></ruby></span>
                     <span class="fragment">、程昱銘</span>
                 </p>
                 <p>課程：物件導向程式設計</p>
@@ -124,7 +124,7 @@
                 <h3>分工明細</h3>
                 <ul>
                     <li>高憲成：程式設計、GUI 開發、邏輯整合</li>
-                    <li>張育溥：文件、報告撰寫、核心架構構建</li>
+                    <li>張育<ruby>溥<rt>ㄆㄨˇ</rt></ruby>：文件、報告撰寫、核心架構構建</li>
                     <li id="dropping-target">程昱銘<span data-type="half">：</span><span data-type="full">吃、睡、吃睡</span><span
                             class="fragment" id="drop-it"></span>
                     </li>
@@ -282,6 +282,19 @@ public:
 }</code></pre>
             </section>
             <section>
+                <h3>UML <span style="font-style: italic;">(已簡化)</span></h3>
+                
+                <img src="/assets/uml_gui.svg" style="height: 800px;">
+            </section>
+            <section>
+                <h3>UML <span style="font-style: italic;">(已簡化)</span></h3>
+                <img src="/assets/uml_game.svg" style="height: 800px;">
+            </section>
+            <section>
+                <h3>遊戲迴圈流程圖 <span style="font-style: italic;">(已簡化)</span></h3>
+                <img src="/assets/flowchart.png" style="height: 800px;">
+            </section>
+            <section>
                 <h3>OOP 設計模式運用</h3>
                 <ul>
                     <li>觀察者模式 (Observer)
@@ -367,17 +380,158 @@ Hotbar::Hotbar(Props props) :
                 </code></pre>
             </section>
             <section>
-                <h3>GitHub</h3>
-                <p><a href="https://github.com/StarryQuasi/oop-mine-game" target="_blank">StarryQuasi/oop-mine-game</a>
-                </p>
-                <img src="/written-by-a-human.svg" style="margin: 5px 0; height: 60px;">
-                <br>
-                <img data-src="/github.png" style="height: 640px; margin: 5px 0;">
+                <h3>C++20/23 功能運用</h3>
+                <p><a href="https://github.com/StarryQuasi/oop-mine-game/blob/main/src/World.h">World.h</a></p>
+                <p>C++20 concepts, constraints 模板參數限制</p>
+                <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+template &lt;typename T, typename... Args>
+//  v
+    requires std::derived_from&lt;T, Entity>
+T& World::addEntity(Args&&... args)
+{
+    return adoptEntity(std::make_unique&lt;T>(std::forward&lt;Args>(args)...));
+}
+
+template &lt;typename T, typename... Args>
+//  v
+    requires std::derived_from&lt;T, Entity>
+T& World::adoptEntity(std::unique_ptr&lt;T> entity)
+{
+    const int id = entity->getId();
+    entities[id] = std::move(entity);
+    return *static_cast&lt;T*>(entities[id].get());
+}
+                </code></pre>
             </section>
             <section>
-                <h3>Q&A 時間</h3>
+                <h3>C++20/23 功能運用</h3>
+                <p><a href="https://github.com/StarryQuasi/oop-mine-game/blob/main/src/Utils.h">Utils.h</a>,<a href="https://github.com/StarryQuasi/oop-mine-game/blob/main/src/World.cpp">World.cpp</a></p>
+                <p>C++20 ranges, views 懶惰序列</p>
+                <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+static auto Iterate::over(const olc::vi2d& min, const olc::vi2d& max)
+{
+    //     v
+    return std::views::iota(min.y, max.y) |
+           std::views::transform(
+               [min, max](int y)
+               {
+                   return std::views::iota(min.x, max.x) |
+                          std::views::transform(
+                              [y](int x) { return olc::vi2d{x, y}; });
+               }) |
+           std::views::join;
+}
+
+void World::draw(OopMineGame& game)
+{
+    const olc::vi2d tl = game.getView().GetTopLeftTile().max({0, 0});
+    const olc::vi2d br = game.getView().GetBottomRightTile().min(getSize());
+    //                   v
+    for (const auto& p : Iterate::over(tl, br))
+    {
+        drawBlock(p);
+    }
+}
+                </code></pre>
+            </section>
+            <section>
+                <h3>C++20/23 功能運用</h3><p><a href="https://github.com/StarryQuasi/oop-mine-game/blob/main/src/Utils.h">Utils.h</a></p>
+                <p>C++20 type safe format, println 你敢信嗎</p>
+                <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+static std::string Utils::toString(const olc::vi2d& v)
+{
+    return std::format("({},{})", v.x, v.y);
+}
+
+static std::string Utils::toString(const olc::vf2d& v)
+{
+    return std::format("({:.3f},{:.3f})", v.x, v.y);
+}
+
+int main()
+{
+    olc::vf2d pos = {3.14169f, 1337.420f};
+    // 終於有這個功能了...
+    // 也可以特化 std::formatter&lt;olc::vf2d> 自動轉成 std::string 但需要寫更多 code
+    std::println("you are at {}", Utils::toString(pos));
+}
+                </code></pre>
+            </section>
+            <section>
+                <h3>C++20/23 功能運用</h3>
+                <p>C++23 views::join_with, ranges::to 更多序列操作</p>
+                <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+using namespace std::string_view_literals;
+std::string _name = "Omg So Much Code Kill Me";
+std::string _textureName = _name |
+    std::views::transform([](unsigned char c)
+                            { return (unsigned char)std::tolower(c); }) |
+    std::views::split(" "sv) |
+    std::views::join_with("_"sv) |
+    std::ranges::to&lt;std::string>();
+// _textureName = "omg_so_much_code_kill_me"
+                </code></pre>
+            </section>
+            <section data-auto-animate>
+                <h3>C++20/23 功能運用</h3>
+                <p>C++20 designated initializers <span style="font-size:0.5em;">from C99</span> 能寫名字的針對/選擇性初始化</p>
+                <pre><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
+struct /*gui::*/Props
+{
+    std::optional&lt;olc::vi2d> size = {};
+    std::optional&lt;olc::vi2d> pos = {};
+    // ...
+}
+void addPictureElement()
+{
+    auto flow = guiRoot->addChild&lt;gui::FlowContainer>({
+        .anchor = gui::Anchor::midMiddle,
+        .origin = gui::Anchor::midMiddle,
+        .padding = {{3, 3}},
+        .direction = gui::Direction::vertical,
+    });
+    flow->addChild&lt;gui::Container>({
+        .size = {{100, 100}},
+        .assetName = "erm.jpg",
+    });
+    flow->addChild&lt;gui::TextContainer>({
+        .anchor = gui::Anchor::topMiddle,
+        .origin = gui::Anchor::topMiddle,
+        .margin = {{0, 3}},
+        .text = "erm...",
+        .scale = 3.0f,
+    });
+}
+                </code></pre>
+            </section>
+            <section data-auto-animate>
+                <h3>C++20/23 功能運用</h3>
+                <img src="/assets/erm.png">
+            </section>
+            <section data-auto-animate>
+                <h3>C++20/23 功能運用</h3>
+                <p>將盛軒老師教的 HTML 與祐全老師教的 OOP 融合運用 🩷</p>
+                <img src="/assets/erm_debug.png">
+            </section>
+            <section>
+                <h3>運行畫面</h3>
+                <video src="/assets/video.mp4" data-autoplay preload="auto" loop></video>
+            </section>
+            <section>
+                <h3>GitHub</h3>
+                <p><a href="https://github.com/StarryQuasi/oop-mine-game">StarryQuasi/oop-mine-game</a></p>
+                <img src="/assets/written-by-a-human.svg" style="margin: 5px 0; height: 60px;">
+                <br>
+                <img data-src="/assets/github.png" style="height: 640px; margin: 5px 0;">
+            </section>
+            <section>
+                <h3>Q&A&DEMO 時間</h3>
                 <br>
                 <p>感謝觀看，歡迎交流與學習</p>
+                <br>
+                <small><a target="_blank"
+                        href="https://github.com/StarryQuasi/oop-mine-game#%E9%81%8A%E6%88%B2%E5%9F%B7%E8%A1%8C">載點伸手黨看這</a>
+                </small>
                 <br>
                 <br>
                 <div class="center"><small>Slides powered by</small><img
@@ -385,7 +539,7 @@ Hotbar::Hotbar(Props props) :
             </section>
         </div>
     </div>
-    <img src="/written-by-a-human.svg" class="not-ai-logo">
+    <img src="/assets/written-by-a-human.svg" class="not-ai-logo">
 
     <script src="dist/reveal.js"></script>
     <script src="dist/plugin/notes.js"></script>
@@ -401,6 +555,7 @@ Hotbar::Hotbar(Props props) :
             height: 700 * 1.3,
             // Learn about plugins: https://revealjs.com/plugins/
             plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+            pdfSeparateFragments: false,
         });
 
         function prepareDroppingText() {
