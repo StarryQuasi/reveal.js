@@ -132,12 +132,13 @@
             </section>
             <section>
                 <ul>
-                    <li><b>核心願景：</b>打造一個類似 <span class="grass-text">Minecraft</span> 的 2D 沙盒遊戲</li>
-                    <li><b>技術目標：</b>
+                    <li><b>願景：</b>打造一個類似 <span class="grass-text">Minecraft</span> 的 2D 沙盒遊戲</li>
+                    <li><b>目標：</b>
                         <ul>
-                            <li>學習 <b>C++23</b> 現代語法</li>
-                            <li>設計樹狀、<b>模組化</b>的 GUI 排版系統</li>
+                            <li>學習 <b>C++</b></li>
                             <li>使用 <b>OOP 三大特性</b> 解決資源管理難題</li>
+                            <li>設計樹狀、<b>模組化</b>的 GUI 排版系統</li>
+                            <li>設計樹狀、<b>可繼承</b>的實體型別系統</li>
                         </ul>
                     </li>
                 </ul>
@@ -192,7 +193,7 @@
             </section>
             <section data-auto-animate>
                 <h3>系統架構</h3>
-                <p>gui 同上，container <b>封裝</b>基礎資料</p>
+                <p>GUI 同上，容器<b>封裝</b>基礎資料</p>
                 <p><b>多形</b>儲存子元件</p>
                 <p>再向外<b>繼承</b>、擴展出</p>
                 <pre data-id="code-animation"><code data-trim data-line-numbers="10" style="max-height: unset;">
@@ -233,11 +234,11 @@
             </section>
             <section data-auto-animate data-auto-animate-restart>
                 <h3><span style="font-weight: normal;">封裝、繼承、</span>多型</h3>
-                <p>範例 OOP 運用</p>
+                <!-- <p>範例 OOP 運用</p> -->
                 <pre data-id="code-animation"><code data-trim data-noescape style="max-height: unset;" class="language-cpp">
 class World {
 private:
-    std::vector&lt;std::unique_ptr&lt;Entity>> entities{};
+    std::vector&lt;std::unique_ptr&lt;Entity>> entities{}; // 多型
 
     template &lt;typename T, typename... Args>
         requires std::derived_from&lt;T, Entity> // C++20 constraints and concepts
@@ -283,7 +284,7 @@ public:
             </section>
             <section>
                 <h3>UML <span style="font-style: italic;">(已簡化)</span></h3>
-                
+
                 <img src="/assets/uml_gui.svg" style="height: 800px;">
             </section>
             <section>
